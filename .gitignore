@@ -1,2 +1,3 @@
 venv/
 antispam-data.json
+__pycache__/

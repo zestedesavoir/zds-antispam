@@ -11,7 +11,7 @@ import json
 _bio = []
 _can_read = []
 
-with open('./data.json', 'r') as f:
+with open('./antispam-data.json', 'r') as f:
     _data = json.load(f)
 
 for _elem in _data:
@@ -58,34 +58,24 @@ X_new_tfidf = tfidf_transformer.transform(X_new_counts)
 
 predicted = clf.predict(X_new_tfidf)
 
-average = 0
-confusions = {}
-for real, pred in zip(can_read_test, predicted):
-    if real==pred:
-        average += 1
+if __name__ == '__main__':
+    average = 0
+    confusions = {}
+    for real, pred in zip(can_read_test, predicted):
+        if real==pred:
+            average += 1
 
-    elem = 'real {} => pred {}'.format(real, pred)
+        elem = 'real {} => pred {}'.format(real, pred)
 
-    if not confusions.get(elem, False):
-        confusions[elem] = [0, '']
+        if not confusions.get(elem, False):
+            confusions[elem] = [0, '']
 
-    confusions[elem][0] += 1
+        confusions[elem][0] += 1
 
-for elem in confusions:
-    confusions[elem][1] = '{} %'.format(round(confusions[elem][0]/len(can_read_test)*100))
+    for elem in confusions:
+        confusions[elem][1] = '{} %'.format(round(confusions[elem][0]/len(can_read_test)*100))
 
-print('\n', round(average/len(can_read_test)*100,2), '%\n\n')
+    print('\n', round(average/len(can_read_test)*100,2), '%\n\n')
 
-pprint(confusions)
+    pprint(confusions)
 
-if False:
-    while True:
-        inpt = input('Enter a sentence (q to quit): ')
-
-        if inpt == "q":
-            break
-
-        X_new_counts = count_vect.transform([inpt])
-        X_new_tfidf = tfidf_transformer.transform(X_new_counts)
-
-        print(clf.predict(X_new_tfidf)[0], '\n')

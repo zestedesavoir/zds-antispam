@@ -19,4 +19,4 @@ for elem in raw_data:
 with open('/opt/zds/webroot/static/antispam-data.json', 'w') as f:
     json.dump(data, f)
 
-# Do not forget to remove the file with `sudo -u zds rm /opt/zds/webroot/static/antispam-data.json`!
+# Do not forget to remove the file with `sudo rm /opt/zds/webroot/static/antispam-data.json`!
