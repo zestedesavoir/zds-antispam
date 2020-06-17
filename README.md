@@ -17,7 +17,8 @@ Create a file nammed `secrets.json` with :
     "client_id": "foo",
     "client_secret": "bar",
     "username": "something",
-    "password": "else"
+    "password": "else",
+    "topic_id": "42"
 }
 ```
 

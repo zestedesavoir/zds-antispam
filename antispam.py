@@ -22,7 +22,6 @@ class Antispam:
     last_user = ''
 
     page_size = 50
-    topic_id = 28029
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -85,8 +84,8 @@ class Antispam:
             body = {
                 'text': message
             }
-            self.logger.debug('POST ' + self.URI_SEND.format(self.topic_id))
-            response = requests.post(self.URI_BASE + self.URI_SEND.format(self.topic_id), json=body, headers=headers)
+            self.logger.debug('POST ' + self.URI_SEND.format(self.secrets['topic_id']))
+            response = requests.post(self.URI_BASE + self.URI_SEND.format(self.secrets['topic_id']), json=body, headers=headers)
             response.raise_for_status()
 
     def check(self, biography):
