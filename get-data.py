@@ -5,11 +5,10 @@ from django.db.models import Q, F
 from zds.member.models import Profile
 import json
 
-# For each user, we save their username and if they are banned or not
-# We also keep their biography, signature and website
+# For each user, we save their username, their biography and a flag to know if they are banned or not
 raw_data = list(Profile.objects.values('biography', 'can_read', username=F('user__username')))
 
-# We remove users when their biography, signature and website are empty
+# We remove users when their biography are empty
 data = []
 for elem in raw_data:
     if elem['biography'] != "":

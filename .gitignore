@@ -1,4 +1,6 @@
 venv/
 antispam-data.json
 __pycache__/
-secrets.py
+secrets.json
+tokens.json
+last_user.txt
