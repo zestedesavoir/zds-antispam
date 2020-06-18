@@ -3,6 +3,7 @@ from training import count_vect, tfidf_transformer, clf
 import json
 import logging
 import requests
+from time import sleep
 
 class Antispam:
 
@@ -45,7 +46,8 @@ class Antispam:
 
         self.logger.debug('GET ' + self.URI_LIST_USERS.format(self.page_size))
         response = requests.get(self.URI_BASE + self.URI_LIST_USERS.format(self.page_size), headers=headers)
-        if response.status_code == 401:
+        if response.status_code in (401, 429):
+            self.logger.warn('HTTP Error 401 or 429, need to refresh tokens')
             self.tokens['access_token'] = None
             return self.runtime()
         response.raise_for_status()
@@ -54,10 +56,17 @@ class Antispam:
         potential_spammers = []
         for member in members:
             if self.last_user == str(member['id']):
-                return
+                break
+
+            # Avoiding too many requests in a short time
+            sleep(1)
 
             self.logger.debug('GET ' + self.URI_USER.format(member['id']))
             response = requests.get(self.URI_BASE + self.URI_USER.format(member['id']), headers=headers)
+            if response.status_code in (401, 429):
+                self.logger.warn('HTTP Error 401 or 429, need to refresh tokens')
+                self.tokens['access_token'] = None
+                return self.runtime()
             response.raise_for_status()
             biography = response.json()['biography']
 
@@ -71,10 +80,6 @@ class Antispam:
             else:
                 self.logger.info("✔️  %s's biography doesn't look like spam" % member['username'])
 
-        if not self.last_user:
-            self.last_user = str(members[0]['id'])
-            self._save_last_user()
-
         if potential_spammers:
             message = "Those members are potential spammers:\n"
 
@@ -86,7 +91,15 @@ class Antispam:
             }
             self.logger.debug('POST ' + self.URI_SEND.format(self.secrets['topic_id']))
             response = requests.post(self.URI_BASE + self.URI_SEND.format(self.secrets['topic_id']), json=body, headers=headers)
+            if response.status_code in (401, 429):
+                self.logger.warn('HTTP Error 401 or 429, need to refresh tokens')
+                self.tokens['access_token'] = None
+                return self.runtime()
             response.raise_for_status()
+            self.logger.info('\n=> Message sent!')
+
+        self.last_user = str(members[0]['id'])
+        self._save_last_user()
 
     def check(self, biography):
         X_new_counts = count_vect.transform([biography])
