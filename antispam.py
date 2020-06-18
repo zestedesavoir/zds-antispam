@@ -1,5 +1,10 @@
+# We need to be in the script's directory
+import os
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 from training import count_vect, tfidf_transformer, clf
 
+from datetime import datetime
 import json
 import logging
 import requests
@@ -28,9 +33,10 @@ class Antispam:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
         self.logger.addHandler(logging.FileHandler('antispam.log', mode='w'))
+        self.logger.info('\n\n# Antispam started ' + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '\n\n')
         self.logger.addHandler(logging.StreamHandler())
-        self.logger.setLevel(logging.DEBUG)
 
         self._load_secrets()
         self._load_tokens()

@@ -11,7 +11,7 @@ import json
 _bio = []
 _can_read = []
 
-with open('./antispam-data.json', 'r') as f:
+with open('antispam-data.json', 'r') as f:
     _data = json.load(f)
 
 for _elem in _data:
