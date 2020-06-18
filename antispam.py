@@ -5,6 +5,8 @@ import logging
 import requests
 from time import sleep
 
+# The structure of this bot is inspired from tleb's zds-user-map at https://github.com/tleb/zds-user-map
+
 class Antispam:
 
     URI_BASE = 'https://zestedesavoir.com'
