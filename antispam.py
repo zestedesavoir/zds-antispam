@@ -28,8 +28,9 @@ class Antispam:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(logging.FileHandler('antispam.log', mode='w'))
         self.logger.addHandler(logging.StreamHandler())
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
         self._load_secrets()
         self._load_tokens()

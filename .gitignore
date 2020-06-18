@@ -4,3 +4,4 @@ __pycache__/
 secrets.json
 tokens.json
 last_user.txt
+antispam.log
