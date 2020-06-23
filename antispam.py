@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 import logging
 import requests
+import sys
 from time import sleep
 
 # The structure of this bot is inspired from tleb's zds-user-map at https://github.com/tleb/zds-user-map
@@ -25,28 +26,28 @@ class Antispam:
 
     tokens_file = 'tokens.json'
     tokens = {}
-    
-    last_user_file = 'last_user.txt'
-    last_user = ''
 
-    page_size = 50
+    reported_users_file = 'reported_users.txt'
+    reported_users = []
 
-    def __init__(self):
+    def __init__(self, page_size=50):
+        self.page_size = page_size
+
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(logging.FileHandler('antispam.log', mode='a'))
         self.logger.info('\n\n# Antispam started ' + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '\n\n')
         self.logger.addHandler(logging.StreamHandler())
 
-        self._load_secrets()
-        self._load_tokens()
-        self._load_last_user()
+        self.load_secrets()
+        self.load_tokens()
+        self.load_reported_users()
 
         self.runtime()
 
     def runtime(self):
         if self.tokens.get('access_token') is None:
-            self._refresh_tokens()
+            self.refresh_tokens()
 
         headers = {
             'Accept': 'application/json',
@@ -62,10 +63,11 @@ class Antispam:
         response.raise_for_status()
         members = response.json()['results']
 
-        potential_spammers = []
+        users_to_report = []
         for member in members:
-            if self.last_user == str(member['id']):
-                break
+            if member['username'] in self.reported_users:
+                self.logger.info('✘  %s has already been reported as potential spam' % member['username'])
+                continue
 
             # Avoiding too many requests in a short time
             sleep(1)
@@ -85,15 +87,16 @@ class Antispam:
 
             if self.check(biography) == 0:
                 self.logger.info("✘  %s's biography looks like spam" % member['username'])
-                potential_spammers.append(member['username'])
+                users_to_report.append(member['username'])
+                reported_users.append(member['username'])
             else:
                 self.logger.info("✔️  %s's biography doesn't look like spam" % member['username'])
 
-        if potential_spammers:
-            message = "Those members are potential spammers:\n"
+        if users_to_report:
+            message = "Ces membres sont potentiellement des spammeurs :\n"
 
-            for spammer in potential_spammers:
-                message = message + '\n- @**' + spammer + '**'
+            for user in users_to_report:
+                message = message + '\n- @**' + user + '**'
 
             body = {
                 'text': message
@@ -107,17 +110,17 @@ class Antispam:
             response.raise_for_status()
             self.logger.info('\n=> Message sent!')
 
-        self.last_user = str(members[0]['id'])
-        self._save_last_user()
+            self.reported_users += users_to_report
+            self.save_reported_users()
 
     def check(self, biography):
         X_new_counts = count_vect.transform([biography])
         X_new_tfidf = tfidf_transformer.transform(X_new_counts)
         return clf.predict(X_new_tfidf)[0]
 
-    def _refresh_tokens(self):
+    def refresh_tokens(self):
         if self.tokens.get('refresh_token') is None:
-            self._refresh_tokens_from_logins()
+            self.refresh_tokens_from_logins()
 
         body = {
             'grant_type': 'refresh_token',
@@ -135,9 +138,9 @@ class Antispam:
             'access_token': content['access_token'],
             'refresh_token': content['refresh_token']
         }
-        self._save_tokens()
+        self.save_tokens()
 
-    def _refresh_tokens_from_logins(self):
+    def refresh_tokens_from_logins(self):
         body = {
             'grant_type': 'password',
             'client_id': self.secrets['client_id'],
@@ -155,32 +158,34 @@ class Antispam:
             'access_token': content['access_token'],
             'refresh_token': content['refresh_token']
         }
-        self._save_tokens()
+        self.save_tokens()
 
-    def _save_tokens(self):
+    def save_tokens(self):
         with open(self.tokens_file, 'w') as f:
             json.dump(self.tokens, f)
 
-    def _load_tokens(self):
+    def load_tokens(self):
         try:
             with open(self.tokens_file, 'r') as f:
                 self.tokens = json.load(f)
         except FileNotFoundError:
-            self._refresh_tokens()
+            self.refresh_tokens()
 
-    def _load_secrets(self):
+    def load_secrets(self):
         with open(self.secrets_file, 'r') as f:
             self.secrets = json.load(f)
 
-    def _save_last_user(self):
-        with open(self.last_user_file, 'w') as f:
-            f.write(self.last_user)
+    def save_reported_users(self):
+        with open(self.reported_users_file, 'w') as f:
+            f.writelines(self.reported_users)
 
-    def _load_last_user(self):
+    def load_reported_users(self):
         try:
-            with open(self.last_user_file, 'r') as f:
-                self.last_user = f.read()
+            with open(self.reported_users_file, 'r') as f:
+                self.reported_users = f.readlines()
         except FileNotFoundError:
-            self.last_user = ''
+            self.reported_users = []
 
-Antispam()
+if len(sys.argv) > 1:
+    page_size = int(sys.argv[1])
+    Antispam(page_size)
