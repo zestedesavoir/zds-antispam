@@ -56,7 +56,7 @@ class Antispam:
         self.logger.debug('GET ' + self.URI_LIST_USERS.format(self.page_size))
         response = requests.get(self.URI_BASE + self.URI_LIST_USERS.format(self.page_size), headers=headers)
         if response.status_code in (401, 429):
-            self.logger.warn('HTTP Error 401 or 429, need to refresh tokens')
+            self.logger.warning('HTTP Error 401 or 429, need to refresh tokens')
             self.tokens['access_token'] = None
             return self.runtime()
         response.raise_for_status()
@@ -73,7 +73,7 @@ class Antispam:
             self.logger.debug('GET ' + self.URI_USER.format(member['id']))
             response = requests.get(self.URI_BASE + self.URI_USER.format(member['id']), headers=headers)
             if response.status_code in (401, 429):
-                self.logger.warn('HTTP Error 401 or 429, need to refresh tokens')
+                self.logger.warning('HTTP Error 401 or 429, need to refresh tokens')
                 self.tokens['access_token'] = None
                 return self.runtime()
             response.raise_for_status()
@@ -101,7 +101,7 @@ class Antispam:
             self.logger.debug('POST ' + self.URI_SEND.format(self.secrets['topic_id']))
             response = requests.post(self.URI_BASE + self.URI_SEND.format(self.secrets['topic_id']), json=body, headers=headers)
             if response.status_code in (401, 429):
-                self.logger.warn('HTTP Error 401 or 429, need to refresh tokens')
+                self.logger.warning('HTTP Error 401 or 429, need to refresh tokens')
                 self.tokens['access_token'] = None
                 return self.runtime()
             response.raise_for_status()
