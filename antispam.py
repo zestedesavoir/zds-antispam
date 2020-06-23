@@ -88,7 +88,6 @@ class Antispam:
             if self.check(biography) == 0:
                 self.logger.info("✘  %s's biography looks like spam" % member['username'])
                 users_to_report.append(member['username'])
-                reported_users.append(member['username'])
             else:
                 self.logger.info("✔️  %s's biography doesn't look like spam" % member['username'])
 
