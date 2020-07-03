@@ -37,7 +37,6 @@ class Antispam:
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(logging.FileHandler('antispam.log', mode='a'))
         self.logger.info('\n\n# Antispam started ' + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '\n\n')
-        self.logger.addHandler(logging.StreamHandler())
 
         self.load_secrets()
         self.load_tokens()
@@ -176,12 +175,12 @@ class Antispam:
 
     def save_reported_users(self):
         with open(self.reported_users_file, 'w') as f:
-            f.writelines(self.reported_users)
+            f.write('\n'.join(self.reported_users))
 
     def load_reported_users(self):
         try:
             with open(self.reported_users_file, 'r') as f:
-                self.reported_users = f.readlines()
+                self.reported_users = f.read().split('\n')
         except FileNotFoundError:
             self.reported_users = []
 
