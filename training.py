@@ -1,7 +1,4 @@
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB
-from sklearn.linear_model import SGDClassifier
-from sklearn.dummy import DummyClassifier
 from sklearn.svm import LinearSVC
 from pprint import pprint
 import json
@@ -41,14 +38,7 @@ X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 
 # Classifier training
 
-#clf = MultinomialNB().fit(X_train_tfidf, can_read_train)
-#clf = BernoulliNB().fit(X_train_tfidf, can_read_train)
-
-#clf = SGDClassifier(loss='squared_hinge', penalty='l2', alpha=1e-3,
-#                    max_iter=5000, tol=None, n_jobs=-1)
 clf = LinearSVC(max_iter=5000, loss='hinge')
-#clf = DummyClassifier("most_frequent")
-
 clf.fit(X_train_tfidf, can_read_train)
 
 # Prediction of test data
