@@ -3,6 +3,7 @@ import os
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 from training import count_vect, tfidf_transformer, clf
+from send_alerts import send_alerts
 
 from datetime import datetime
 import json
@@ -91,21 +92,30 @@ class Antispam:
                 self.logger.info("✔️  %s's biography doesn't look like spam" % member['username'])
 
         if users_to_report:
-            message = "Ces membres sont potentiellement des spammeurs :\n"
+            try:
+                send_alerts(
+                    website=URI_BASE,
+                    bot_username=self.secrets['username'],
+                    bot_password=self.secrets['password'],
+                    suspected_usernames=users_to_report
+                )
+            except requests.exceptions.HTTPError:
+                message = "Ces membres sont potentiellement des spammeurs :\n"
 
-            for user in users_to_report:
-                message = message + '\n- @**' + user + '**'
+                for user in users_to_report:
+                    message = message + '\n- @**' + user + '**'
 
-            body = {
-                'text': message
-            }
-            self.logger.debug('POST ' + self.URI_SEND.format(self.secrets['topic_id']))
-            response = requests.post(self.URI_BASE + self.URI_SEND.format(self.secrets['topic_id']), json=body, headers=headers)
-            if response.status_code in (401, 429):
-                self.logger.warning('HTTP Error 401 or 429, need to refresh tokens')
-                self.tokens['access_token'] = None
-                return self.runtime()
-            response.raise_for_status()
+                body = {
+                    'text': message
+                }
+                self.logger.debug('POST ' + self.URI_SEND.format(self.secrets['topic_id']))
+                response = requests.post(self.URI_BASE + self.URI_SEND.format(self.secrets['topic_id']), json=body, headers=headers)
+                if response.status_code in (401, 429):
+                    self.logger.warning('HTTP Error 401 or 429, need to refresh tokens')
+                    self.tokens['access_token'] = None
+                    return self.runtime()
+                response.raise_for_status()
+
             self.logger.info('\n=> Message sent!')
 
             self.reported_users += users_to_report
