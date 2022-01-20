@@ -94,12 +94,16 @@ class Antispam:
         if users_to_report:
             try:
                 send_alerts(
-                    website=URI_BASE,
+                    website=self.URI_BASE,
                     bot_username=self.secrets['username'],
                     bot_password=self.secrets['password'],
                     suspected_usernames=users_to_report
                 )
-            except requests.exceptions.HTTPError:
+
+                self.logger.info('\n=> Alert sent!')
+            except requests.exceptions.HTTPError as e:
+                self.logger.exception(e)
+
                 message = "Ces membres sont potentiellement des spammeurs :\n"
 
                 for user in users_to_report:
@@ -116,7 +120,7 @@ class Antispam:
                     return self.runtime()
                 response.raise_for_status()
 
-            self.logger.info('\n=> Message sent!')
+                self.logger.info('\n=> Message sent!')
 
             self.reported_users += users_to_report
             self.save_reported_users()
