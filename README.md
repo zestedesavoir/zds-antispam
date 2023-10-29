@@ -66,4 +66,4 @@ We need to put the secrets in a JSON file nammed `secrets.json` with this struct
 
 Then, we just have to run `antispam.py`!
 
-It can be automated using a cronjob because it keeps track of already reported potential spammers in a text file nammed `reported_users.txt`.
+It can be automated using a cronjob because it keeps track of already reported potential spammers in a text file named `reported_users.txt`.
