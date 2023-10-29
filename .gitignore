@@ -3,5 +3,5 @@ antispam-data.json
 __pycache__/
 secrets.json
 tokens.json
-last_user.txt
+reported_users.txt
 antispam.log
