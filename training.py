@@ -38,7 +38,7 @@ X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
 
 # Classifier training
 
-clf = LinearSVC(max_iter=5000, loss='hinge')
+clf = LinearSVC(max_iter=5000, loss='hinge', dual="auto")
 clf.fit(X_train_tfidf, can_read_train)
 
 # Prediction of test data
