@@ -30,18 +30,17 @@ bio_train, bio_test, can_read_train, can_read_test = train_test_split(
 # Transformation text->number (text preprocessing, tokenizing and filtering of stopwords) and frequency calculation
 
 vectorizer = TfidfVectorizer(lowercase=True, strip_accents="unicode")
-X_train_tfidf = vectorizer.fit_transform(bio_train)
+bio_train_transformed = vectorizer.fit_transform(bio_train)
 
 # Classifier training
 
-clf = LinearSVC(max_iter=5000, loss='hinge', dual="auto")
-clf.fit(X_train_tfidf, can_read_train)
+model = LinearSVC(max_iter=5000, loss='hinge', dual="auto")
+model.fit(bio_train_transformed, can_read_train)
 
 # Prediction of test data
 
-X_new_tfidf = vectorizer.transform(bio_test)
-
-predicted = clf.predict(X_new_tfidf)
+bio_test_transformed = vectorizer.transform(bio_test)
+predicted = model.predict(bio_test_transformed)
 
 if __name__ == '__main__':
     average = 0
