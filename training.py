@@ -29,7 +29,7 @@ bio_train, bio_test, can_read_train, can_read_test = train_test_split(
 
 # Transformation text->number (text preprocessing, tokenizing and filtering of stopwords) and frequency calculation
 
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(lowercase=True, strip_accents="unicode")
 X_train_tfidf = vectorizer.fit_transform(bio_train)
 
 # Classifier training
