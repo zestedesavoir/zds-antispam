@@ -1,4 +1,4 @@
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from pprint import pprint
@@ -27,15 +27,10 @@ bio_train, bio_test, can_read_train, can_read_test = train_test_split(
     stratify=_can_read,
 )
 
-# Transformation text->number (text preprocessing, tokenizing and filtering of stopwords)
+# Transformation text->number (text preprocessing, tokenizing and filtering of stopwords) and frequency calculation
 
-count_vect = CountVectorizer()
-X_train_counts = count_vect.fit_transform(bio_train)
-
-# Frequency calculation
-
-tfidf_transformer = TfidfTransformer()
-X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
+vectorizer = TfidfVectorizer()
+X_train_tfidf = vectorizer.fit_transform(bio_train)
 
 # Classifier training
 
@@ -44,8 +39,7 @@ clf.fit(X_train_tfidf, can_read_train)
 
 # Prediction of test data
 
-X_new_counts = count_vect.transform(bio_test)
-X_new_tfidf = tfidf_transformer.transform(X_new_counts)
+X_new_tfidf = vectorizer.transform(bio_test)
 
 predicted = clf.predict(X_new_tfidf)
 

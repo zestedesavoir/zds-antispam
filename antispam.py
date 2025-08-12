@@ -2,7 +2,7 @@
 import os
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-from training import count_vect, tfidf_transformer, clf
+from training import vectorizer, clf
 from send_alerts import send_alerts
 
 from datetime import datetime
@@ -126,8 +126,7 @@ class Antispam:
             self.save_reported_users()
 
     def check(self, biography):
-        X_new_counts = count_vect.transform([biography])
-        X_new_tfidf = tfidf_transformer.transform(X_new_counts)
+        X_new_tfidf = vectorizer.transform([biography])
         return clf.predict(X_new_tfidf)[0]
 
     def refresh_tokens(self):
