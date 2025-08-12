@@ -1,8 +1,17 @@
+from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from pprint import pprint
 import json
+
+def classify_text(text):
+    try:
+        detect(text)
+        return "language"
+    except LangDetectException:
+        return "url" if "http" in text else "other"
 
 # Data importation
 
@@ -13,7 +22,7 @@ with open('antispam-data.json', 'r') as f:
     _data = json.load(f)
 
 for _elem in _data:
-    if not _elem['biography']:
+    if not _elem['biography'] or classify_text(_elem["biography"]) != "language":
         continue
 
     _bio.append(_elem['biography'])
@@ -62,4 +71,3 @@ if __name__ == '__main__':
     print('\n', round(average/len(can_read_test)*100,2), '%\n\n')
 
     pprint(confusions)
-

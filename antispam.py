@@ -2,7 +2,7 @@
 import os
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-from training import vectorizer, model
+from training import vectorizer, model, classify_text
 from send_alerts import send_alerts
 
 from datetime import datetime
@@ -11,6 +11,16 @@ import logging
 import requests
 import sys
 from time import sleep
+
+def is_spam(biography):
+    if classify_text(biography) == "url":
+        return True
+
+    biography_transformed = vectorizer.transform([biography])
+    if model.predict(biography_transformed)[0] == 0:
+        return True
+
+    return False
 
 # The structure of this bot is inspired from tleb's zds-user-map at https://github.com/tleb/zds-user-map
 
@@ -85,7 +95,7 @@ class Antispam:
                 self.logger.info('∅  %s has no biography' % member['username'])
                 continue
 
-            if self.check(biography) == 0:
+            if is_spam(biography):
                 self.logger.info("✘  %s's biography looks like spam" % member['username'])
                 users_to_report.append(member['username'])
             else:
@@ -124,10 +134,6 @@ class Antispam:
 
             self.reported_users += users_to_report
             self.save_reported_users()
-
-    def check(self, biography):
-        biography_transformed = vectorizer.transform([biography])
-        return model.predict(biography_transformed)[0]
 
     def refresh_tokens(self):
         if self.tokens.get('refresh_token') is None:
