@@ -1,4 +1,5 @@
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from pprint import pprint
 import json
@@ -18,13 +19,13 @@ for _elem in _data:
     _bio.append(_elem['biography'])
     _can_read.append(1 if _elem['can_read'] else 0)
 
-_limit = int(round(len(_bio) * 0.8))
-
-bio_train = _bio[:_limit]
-can_read_train = _can_read[:_limit]
-
-bio_test = _bio[_limit:]
-can_read_test = _can_read[_limit:]
+bio_train, bio_test, can_read_train, can_read_test = train_test_split(
+    _bio,
+    _can_read,
+    test_size=0.2,
+    random_state=42,
+    stratify=_can_read,
+)
 
 # Transformation text->number (text preprocessing, tokenizing and filtering of stopwords)
 
